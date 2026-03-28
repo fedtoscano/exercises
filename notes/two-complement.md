@@ -28,3 +28,5 @@ il problema del complemento a 1 è che lascia con due rappresentazioni dello 0
 0 positivo -> 0000
 0 negativo -> 1111 (-8-6-4-2-1)
 
+aggiungendo 1 rimuoviamo la doppia rappresentazione dello 0
+
