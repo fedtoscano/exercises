@@ -1,3 +1,16 @@
+Rappressenta un passaggio in più rispetto al complemento a 1:
+in un sistema a 4 bit, anzichè fermarsi a 1111, si punta a raggiungere 10000
+che si ottiene sommando 1 a 1111 (trattasi di **overflow**), il risultato diventa 0000!
+
+In questo modo si ottiene l'eliminazione della doppia rappresentazione dello 0, che era il problema principale del complemento a 1
+
+Sommando l'uno finale, spingo il numero oltre il limite dei bit disponibili, facendolo tornare a 0
+
+In questo modo si capisce perchè un valore cone 11111011 può avere due significati:
+
+se il programma lo legge come _unsigned_, il valore è **251**
+se lo legge come _signed_, il suo valore è -5 perchè è la distanza che manca per tornare a 0 -> 251 + 5 === 256 (1 valore di overflow rispetto a 255 e si torna a 0)
+
 rappresentare un numero binario insieme al suo segno.
 per fare spazio ai numeri negativi, quelli positivi sono dimezzati.
 
