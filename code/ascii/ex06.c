@@ -1,6 +1,12 @@
 #include <unistd.h>
 
 void from_digit_to_ascii(int digit){
+	char ascii = digit + '0';
+	write(1, &digit, 1);
+}
+
+void from_ascii_to_digit(char c){
+	int digit = c - '0';
 	write(1, &digit, 1);
 }
 
