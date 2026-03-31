@@ -29,7 +29,6 @@ BIT NUMERI POSITIVI/NEGATIVI                            N
 
 il ragionamento è: se un bit è posto a 1, aggiungo la cifra corrispondente, altrimenti non faccio nulla;
 
-
 MSB -> most significant bit
 il bit più significativo è negativo e ha un valore matematico negativo
 
@@ -42,4 +41,5 @@ il problema del complemento a 1 è che lascia con due rappresentazioni dello 0
 0 negativo -> 1111 (-8-6-4-2-1)
 
 aggiungendo 1 rimuoviamo la doppia rappresentazione dello 0
+
 
