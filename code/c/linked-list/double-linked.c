@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 typedef struct node {
   int value;
   struct node *prev;
@@ -21,6 +20,7 @@ node *node_init(int value) {
 }
 
 node *append_after(node *to, int value) {
+  printf("Appending value %d to node with value %d\n", value, to->value);
   node *new = node_init(value);
   if (to->next) {
     new->next = to->next;
@@ -34,6 +34,7 @@ node *append_after(node *to, int value) {
 }
 
 node *append_before(node *to, int value) {
+  printf("Prepending value %d to node with value %d\n", value, to->value);
   node *new = node_init(value);
 
   if (to->prev) {
@@ -56,10 +57,10 @@ void print_node(node *n) {
 node *node_search(node *root, int value) {
   printf("Searching node with value %d\n", value);
   while (root->value != value) {
-		if(root->next == NULL){
-			printf("Node with given vlaue not found!\n");
-			return NULL;
-		}
+    if (root->next == NULL) {
+      printf("Node with given vlaue not found!\n");
+      return NULL;
+    }
 
     root = root->next;
   }
@@ -72,32 +73,62 @@ void print_list(node *root) {
   printf("List node values: ");
   while (root != NULL) {
     printf("%d", root->value);
-    if (root->next != NULL) printf("%s", sep);
+    if (root->next != NULL)
+      printf("%s", sep);
     root = root->next;
   }
 
   printf("\n");
 }
 
-void delete_node(node *n){
+void delete_node(node *n) {
   printf("Deleting node with value %d\n", n->value);
-  if(n->next) n->next->prev = n->prev;
-  if(n->prev) n->prev->next = n->next;
+  if (n->next)
+    n->next->prev = n->prev;
+  if (n->prev)
+    n->prev->next = n->next;
   free(n);
 }
 
+node *append_values(node *to, int values[], int length);
+node *preped_values(node *to, int values[], int length);
+
+node *init_list(int values[], int length) {
+  node *first = node_init(values[0]);
+
+  node *iterator = first;
+  for (int i = 1; i <= length - 1; i++) {
+    node *new = append_after(iterator, values[i]);
+    iterator = new;
+  }
+
+  return first;
+}
+
 int main(void) {
-  node *n = node_init(1);
-  node *nn = append_after(n, 2);
 
-  print_list(n);
-  node *nnn = append_before(nn, 84);
-
-  append_after(nnn, 96);
+  int values[] = {0, 1, 2, 3, 56};
+  int length = sizeof(values) / sizeof(values[0]);
+  node *n = init_list(values, length);
   print_list(n);
 
-  delete_node(nnn);
-  print_list(n);
-  
-  return 0;
+  // int value = 1;
+  // printf("Initalizing node list with value %d\n", value);
+  // node *n = node_init(value);
+  // node *nn = append_after(n, 2);
+  //
+  // print_list(n);
+  // node *nnn = append_before(nn, 84);
+  //
+  // print_list(n);
+  //
+  // append_after(nnn, 96);
+  // print_list(n);
+  //
+  // delete_node(nnn);
+  // print_list(n);
+  //
+  // node_search(n, 84);
+  //
+  // return 0;
 }
