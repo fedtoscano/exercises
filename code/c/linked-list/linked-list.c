@@ -65,7 +65,12 @@ node *node_search(node *root, int value) {
 
 // delete first node with value
 void node_delete(node *root, int value) {
-  // 0, 1, 2, 3, 4
+  if(root->value == value){
+    //this should be handled?
+    printf("Cannot delete the first node!\n");
+    return;
+  }
+
   // find the previous node
   node *prev = root;
   while (prev->next->value != value) {
@@ -82,6 +87,7 @@ void node_delete(node *root, int value) {
     return;
   }
 
+  //if the node is inside the list
   node *next = prev->next->next;
   free(prev->next);
   prev->next = next;
@@ -98,6 +104,6 @@ int main(void) {
   printf("modified found node's value\n");
   node_print(n);
 
-  node_delete(n, 48);
+  node_delete(n, 0);
   node_print(n);
 }
