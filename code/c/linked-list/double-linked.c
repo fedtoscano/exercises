@@ -90,8 +90,21 @@ void delete_node(node *n) {
   free(n);
 }
 
-node *append_values(node *to, int values[], int length);
-node *preped_values(node *to, int values[], int length);
+void append_values(node *to, int values[], int length){
+  node *iterator = to;
+  for(int i = 0; i < length; i++){
+    node *new = append_after(iterator, values[i]);
+    iterator = new;
+  }
+}
+
+void prepend_values(node *to, int values[], int length){
+  node *iterator = to;
+  for(int i = 0; i < length; i++){
+    node *new = append_before(to, values[i]);
+    iterator = new;
+  }
+}
 
 node *init_list(int values[], int length) {
   node *first = node_init(values[0]);
@@ -110,6 +123,19 @@ int main(void) {
   int values[] = {0, 1, 2, 3, 56};
   int length = sizeof(values) / sizeof(values[0]);
   node *n = init_list(values, length);
+
+  int appends[] = {38, 39, 27, 40, 38, 19};
+  append_values(n, appends, 6);
+  print_list(n);
+
+  int prepends[] = {42, 8, 1, 3};
+
+  prepend_values(
+      node_search(n, 27),
+      prepends,
+      4
+  );
+
   print_list(n);
 
   // int value = 1;
