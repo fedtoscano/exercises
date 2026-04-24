@@ -20,19 +20,14 @@ node *node_init(int value){
 	return n;
 }
 
-void append_before(node *to, int value){
-
-}
-
-void append_after(node *to, int value){
-
-}
-
+node *append_before(node *to, int value);
+node *append_after(node *to, int value);
+node *node_search(int value);
 void print_node(node *n);
 void delete_node(node *n);
-node *node_search(int value);
 
 int main(void){
+	node *n = node_init(0);
 
 	return 0;
 }
