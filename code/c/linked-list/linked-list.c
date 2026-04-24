@@ -49,18 +49,33 @@ void node_print(node *root){
   printf("\n");
 }
 
-// return node with value
-node *node_search(node *root, int value);
+// return first node with value
+node *node_search(node *root, int value){
+  printf("Searching node with value %d...\n", value);
+
+  while(root->value != value){
+    if(root->next == NULL) return NULL;
+    root = root->next;
+  }
+
+  printf("Address of found node: %p\n", root);
+  return root;
+}
 
 // delete first node with value
 void node_delete(node *root, int value);
 
 int main(void) {
   node *n = node_init(0);
-
-  for(int i = 0; i <= 4; i++) 
-    node_append(n, i + 1);
-
+  for(int i = 0; i <= 4; i++) node_append(n, i + 1);
   node_print(n);
+
+  node *search = node_search(n, 3);
+  search->value = 48;
+  printf("modified found node's value\n");
+  node_print(n);
+
+
+
 }
 
