@@ -37,8 +37,17 @@ node *node_append(node *root, int value) {
   return temp;
 }
 
-// separator = ", "
-void node_print(node *root);
+void node_print(node *root){
+  char *sep = ", ";
+  printf("Node list values: ");
+  while(root){
+    printf("%d", root->value);
+    if(root->next != NULL) printf("%s", sep);
+    root = root->next;
+  }
+
+  printf("\n");
+}
 
 // return node with value
 node *node_search(node *root, int value);
@@ -47,7 +56,11 @@ node *node_search(node *root, int value);
 void node_delete(node *root, int value);
 
 int main(void) {
-  node *n = node_init(5);
-  printf("%p", n->next);
+  node *n = node_init(0);
+
+  for(int i = 0; i <= 4; i++) 
+    node_append(n, i + 1);
+
+  node_print(n);
 }
 
