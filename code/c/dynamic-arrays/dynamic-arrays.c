@@ -3,7 +3,7 @@
 #include "dynamic-arrays.h"
 
 int check_valid_index(Numbers *n, int index){
-	if(index < 0 ||index > n->size){
+	if(index < 0 ||index >= n->size){
 		printf("Given index is not valid! (%d)\n", index);
 		return -1;
 	}
@@ -23,7 +23,12 @@ void numbers_append(Numbers *n, int value){
 	if(n->size >= n->capacity){
 		//if the maximum capacity is reached, double the capacity
 		n->capacity *=2;
-		n->data = realloc(n->data, n->capacity * sizeof(int));
+		int *temp = realloc(n->data, n->capacity * sizeof(int));
+		if(temp == NULL){
+			printf("Invalid capacity reallocation!\n");
+			return;
+		}
+		n->data = temp;
 	}
 
 	/*
@@ -44,7 +49,7 @@ int numbers_get(Numbers *n, int index){
 
 void numbers_remove_at(Numbers *n, int index){
 	if(check_valid_index(n, index) == -1) return;
-	while(index <= n->size - 1) {
+	while(index < n->size - 1) {
 		n->data[index] = n->data[index + 1];
 		index ++;
 	}
@@ -56,7 +61,11 @@ void numbers_insert_at(Numbers *n, int value, int index){
 	if(check_valid_index(n, index) == -1) return;
 	if(n->size + 1 > n->capacity){
 		n->capacity *=2;
-		n->data = realloc(n->data, n->capacity * sizeof(int));
+		int *temp = realloc(n->data, n->capacity * sizeof(int));
+		if(temp == NULL){
+			printf("Invalid capacity reallocation!\n");
+			return;
+		}
 	}
 
 	if(index == n->size) numbers_append(n, value);
@@ -91,6 +100,43 @@ void numbers_print(Numbers *n){
 
 void numbers_destroy(Numbers *n){
 	free(n->data);
+	n->size = 0;
+	n->capacity = 0;
+}
+
+int numbers_contains(Numbers *n, int value){
+	int found = 0;
+
+	for(int i = 0; i < n->size; i++){
+		if(n->data[i] == value){
+			found = 1;
+			break;
+		}
+	}
+
+	return found;
+}
+
+int numbers_index_of(Numbers *n, int value){
+	for(int i = 0; i < n->size; i++){
+		if(n->data[i] == value) return i;
+	}
+	return -1;
+}
+
+void numbers_shrink(Numbers *n){
+	if(n->size == 0){
+		printf("Cannot shrink data with size of 0!\n");
+		return;
+	}
+
+	n->data = realloc(n->data, n->size * sizeof(int));
+	n->capacity = n->size;
+}
+
+void numbers_clear(Numbers *n){
+	for(int i = 0; i <= n->size - 1; i++)
+		n->data[i] = 0;
 }
 
 int main (void){
