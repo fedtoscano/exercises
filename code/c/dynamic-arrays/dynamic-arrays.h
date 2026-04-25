@@ -12,7 +12,13 @@ typedef struct {
 	int size;
 } Numbers;
 
-Numbers numbers_init(int capacity); void numbers_append(Numbers *n, int value);
+Numbers numbers_init(int capacity); 
+int check_valid_index(Numbers *n, int index);
+void numbers_append(Numbers *n, int value);
 void numbers_destroy(Numbers *n);
+int numbers_get(Numbers *n, int index);
+void numbers_remove_at(Numbers *n, int index);
+void numbers_insert_at(Numbers *n, int value, int index);
+void numbers_print(Numbers *n);
 
 #endif
