@@ -3,12 +3,12 @@
 #include <unistd.h>
 
 
-void *init_segment(size_t size){
-	header_t *header = init_header(size);
-	return get_data_ptr(header);
-}
 
+/*
+ * Initializes a header for a memory segment
+ * */
 header_t *init_header(size_t size){
+	// segment total size
 	size_t total_size = sizeof(header_t) + size;
 
 	// CRUCIAL LINE !
@@ -16,11 +16,23 @@ header_t *init_header(size_t size){
 	header_t *header = sbrk(total_size);
 	if(header == (void*)-1) return NULL;
 
+	//sets header's properties
 	header->size = size;
 	header->is_free = 0;
 	header->next = NULL;
 
 	return header;
+}
+
+/*
+ * Initializes a memory segment
+ * */
+void *init_segment(size_t size){
+	// initializes header
+	header_t *header = init_header(size);
+
+	// returns pointer to data 
+	return get_data_ptr(header);
 }
 
 /* Extracts the data from a header_t pointer */
@@ -58,8 +70,41 @@ void my_free(void *ptr){
 	h->is_free = 1;
 }
 
+void *my_realloc(void *ptr, size_t new_size){
+	// if ptr is NULL, acts like a malloc()
+	if(ptr == NULL) return my_malloc(new_size);
+
+	// if new_size is 0, acts like a free()
+	if(new_size == 0) {
+		my_free(ptr); 
+		return NULL;
+	}
+
+
+	// initalizes new segment
+	void *new_ptr = my_malloc(new_size);
+	if(!new_ptr) return NULL;
+
+	header_t *old_header = get_header_ptr(ptr);
+	size_t copy_size = (old_header->size < new_size)
+		? old_header->size 
+		: new_size;
+
+	//this char* casting allows us to copy byte by byte 
+	//	(sizeof char = 1byte);
+	char *source = ptr;
+	char *dest = new_ptr;
+
+	// copies data into the new segment
+	for(size_t i = 0; i < copy_size; i++) dest[i] = source[i];
+	my_free(ptr);
+	
+	return new_ptr;
+}
+
 void print_segment(void *s){
 	header_t *header = get_header_ptr(s);
+	printf("\n");
 	printf("==============================\n");
 	printf("HEADER\n");
 	printf("Header size: %zu\n", header->size);
@@ -71,36 +116,14 @@ void print_segment(void *s){
 	printf("\n");
 }
 
-void *my_realloc(void *ptr, size_t new_size){
-	if(ptr == NULL) return my_malloc(new_size);
-	if(new_size == 0) {
-		my_free(ptr); 
-		return NULL;
-	}
-
-
-	void *new_ptr = my_malloc(new_size);
-	if(!new_ptr) return NULL;
-
-	header_t *old_header = get_header_ptr(ptr);
-	size_t copy_size = (old_header->size < new_size)
-		? old_header->size 
-		: new_size;
-
-	char *source = ptr;
-	char *dest = new_ptr;
-
-	for(size_t i = 0; i < copy_size; i++) dest[i] = source[i];
-	my_free(ptr);
-	
-	return new_ptr;
-}
-
 int main(void){
 	void *ptr = my_malloc(8);
 	print_segment(ptr);
 
 	void *realloc_ptr = my_realloc(ptr, 20);
+	print_segment(realloc_ptr);
+
+	my_free(realloc_ptr);
 	print_segment(realloc_ptr);
 	return 0;
 }
