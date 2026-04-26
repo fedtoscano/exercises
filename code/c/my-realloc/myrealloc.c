@@ -13,7 +13,6 @@ header_t *init_header(size_t size){
 
 	// CRUCIAL LINE !
 	// sbrk() is a syscall which asks the kernel for space
-	
 	header_t *header = sbrk(total_size);
 	if(header == (void*)-1) return NULL;
 
@@ -29,6 +28,8 @@ void *get_data_ptr(header_t *header){
 	//this method receives a pointer to a header and returns
 	//a pointer to the actual data
 	//to get the data, we must move forward by the size of the header
+	// HEADER - DATA
+	// ^ the users gives this pointer
 	
 	//casting to a char pointer makes its size of 1 byte
 	return (char*)header + sizeof(header_t);
@@ -47,16 +48,29 @@ header_t *get_header_ptr(void *ptr){
 }
 
 
+void *my_malloc(size_t bytes){
+	return init_segment(bytes);
+}
+
+void my_free(void *ptr){
+	header_t *h = get_header_ptr(ptr);
+	h->is_free = 1;
+}
+
+void print_segment(void *s){
+	header_t *header = get_header_ptr(s);
+	printf("==============================\n");
+	printf("HEADER\n");
+	printf("Header size: %zu\n", header->size);
+	printf("Header is_free: %d\n", header->is_free);
+	printf("------------------------------\n");
+	printf("DATA\n");
+	printf("Data ptr: %p\n", s);
+	printf("==============================\n");
+}
 
 int main(void){
-	void *current_brk = sbrk(0);
-	printf("Current BRK: %p\n", current_brk);
-
-	void *new_brk = sbrk(4096);
-	if(new_brk == (void*)-1){
-		perror("sbrk failed");
-		return 1;
-	}
-	printf("New BRK: %p\n", new_brk);
+	void *ptr = my_malloc(8);
+	print_segment(ptr);
 	return 0;
 }

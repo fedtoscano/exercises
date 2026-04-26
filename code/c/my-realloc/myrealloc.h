@@ -17,8 +17,11 @@ typedef struct {
 
 
 header_t *init_header(size_t size);
-void *my_malloc(int bytes);
 void *init_segment(size_t size);
 void *get_data_ptr(header_t *header);
 header_t *get_header_ptr(void *ptr);
+
+void *my_malloc(size_t size);
+void my_free(void *ptr);
+void print_segment(void *s);
 #endif
