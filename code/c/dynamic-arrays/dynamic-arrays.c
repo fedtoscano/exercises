@@ -150,6 +150,23 @@ int is_even(int n) {
   return 0;
 }
 
+int multiply(int value){
+	return  value * 2;
+}
+
+Numbers numbers_map(Numbers *n, int (*callback)(int)){
+	Numbers n_struct = numbers_init(n->capacity);
+	int n_struct_index = 0;
+	for(int i = 0; i < n->size; i++)
+		n_struct.data[n_struct_index++] = callback(n->data[i]);
+
+	
+	n_struct.size = n_struct_index;
+	n_struct.capacity = n_struct.size;
+	
+	return n_struct;
+}
+
 Numbers numbers_filter(Numbers *n, int (*callback)(int)) {
   Numbers n_struct = numbers_init(n->capacity);
 
@@ -181,5 +198,8 @@ int main(void) {
   printf("\n");
   printf("FILTERED NUMBERS \n");
   numbers_print(&filtered);
+
+	Numbers mapped = numbers_map(&n, multiply);
+	numbers_print(&mapped);
   return 0;
 }

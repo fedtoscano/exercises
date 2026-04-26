@@ -26,4 +26,5 @@ void numbers_shrink(Numbers *n);
 void numbers_clear(Numbers *n);
 
 Numbers numbers_filter(Numbers *n, int (*pred)(int));
+Numbers numbers_map(Numbers *n, int (*pred)(int));
 #endif
