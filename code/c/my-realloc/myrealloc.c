@@ -11,6 +11,9 @@ void *init_segment(size_t size){
 header_t *init_header(size_t size){
 	size_t total_size = sizeof(header_t) + size;
 
+	// CRUCIAL LINE !
+	// sbrk() is a syscall which asks the kernel for space
+	
 	header_t *header = sbrk(total_size);
 	if(header == (void*)-1) return NULL;
 
@@ -23,12 +26,23 @@ header_t *init_header(size_t size){
 
 /* Extracts the data from a header_t pointer */
 void *get_data_ptr(header_t *header){
+	//this method receives a pointer to a header and returns
+	//a pointer to the actual data
+	//to get the data, we must move forward by the size of the header
+	
 	//casting to a char pointer makes its size of 1 byte
 	return (char*)header + sizeof(header_t);
 }
 
 /* Extracts the header from a data pointer */
 header_t *get_header_ptr(void *ptr){
+	//this method receives a pointer to the first element of data
+	//and returns a pointer to its header
+	//to get the header, we must move back by the size of the header
+	//
+	// HEADER - DATA
+	//          ^ the users gives this pointer
+	
 	return (header_t *)((char *)ptr - sizeof(header_t));
 }
 
