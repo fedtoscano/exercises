@@ -28,6 +28,7 @@ void *get_data_ptr(header_t *header){
 	//this method receives a pointer to a header and returns
 	//a pointer to the actual data
 	//to get the data, we must move forward by the size of the header
+	//
 	// HEADER - DATA
 	// ^ the users gives this pointer
 	
@@ -67,10 +68,39 @@ void print_segment(void *s){
 	printf("DATA\n");
 	printf("Data ptr: %p\n", s);
 	printf("==============================\n");
+	printf("\n");
+}
+
+void *my_realloc(void *ptr, size_t new_size){
+	if(ptr == NULL) return my_malloc(new_size);
+	if(new_size == 0) {
+		my_free(ptr); 
+		return NULL;
+	}
+
+
+	void *new_ptr = my_malloc(new_size);
+	if(!new_ptr) return NULL;
+
+	header_t *old_header = get_header_ptr(ptr);
+	size_t copy_size = (old_header->size < new_size)
+		? old_header->size 
+		: new_size;
+
+	char *source = ptr;
+	char *dest = new_ptr;
+
+	for(size_t i = 0; i < copy_size; i++) dest[i] = source[i];
+	my_free(ptr);
+	
+	return new_ptr;
 }
 
 int main(void){
 	void *ptr = my_malloc(8);
 	print_segment(ptr);
+
+	void *realloc_ptr = my_realloc(ptr, 20);
+	print_segment(realloc_ptr);
 	return 0;
 }
