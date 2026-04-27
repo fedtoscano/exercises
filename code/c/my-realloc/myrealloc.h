@@ -15,6 +15,9 @@ typedef struct {
 	void *data;
 } Segment;
 
+// pointer to the first header 
+static header_t *head = NULL;
+static header_t *tail = NULL;
 
 header_t *init_header(size_t size);
 void *init_segment(size_t size);
