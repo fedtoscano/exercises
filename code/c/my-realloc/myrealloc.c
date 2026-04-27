@@ -8,7 +8,7 @@
  * Initializes a header for a memory segment
  * */
 header_t *init_header(size_t size){
-	// segment total size
+	// segment total size (header + data)
 	size_t total_size = sizeof(header_t) + size;
 
 	// CRUCIAL LINE !
@@ -34,6 +34,7 @@ void *init_segment(size_t size){
 	// returns pointer to data 
 	return get_data_ptr(header);
 }
+
 
 /* Extracts the data from a header_t pointer */
 void *get_data_ptr(header_t *header){
@@ -68,6 +69,12 @@ void *my_malloc(size_t bytes){
 void my_free(void *ptr){
 	header_t *h = get_header_ptr(ptr);
 	h->is_free = 1;
+}
+
+void *my_calloc(size_t size){
+  void *segment = my_malloc(size);
+	for(size_t i = 0; i < size; i++ ) ((char*)segment)[i] = 0;
+	return segment;
 }
 
 void *my_realloc(void *ptr, size_t new_size){
@@ -119,11 +126,16 @@ void print_segment(void *s){
 int main(void){
 	void *ptr = my_malloc(8);
 	print_segment(ptr);
+	my_free(ptr);
 
 	void *realloc_ptr = my_realloc(ptr, 20);
 	print_segment(realloc_ptr);
 
 	my_free(realloc_ptr);
-	print_segment(realloc_ptr);
+
+	void *calloc_segment = my_calloc(35);
+	print_segment(calloc_segment);
+
+	my_free(calloc_segment);
 	return 0;
 }
