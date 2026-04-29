@@ -22,7 +22,7 @@ header_t *init_header(size_t size) {
 
   if (head == NULL) {
     head = header;
-		tail = header;
+    tail = header;
   } else {
     tail = header;
   }
