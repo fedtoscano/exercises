@@ -2,29 +2,64 @@
 #include <stdio.h>
 #include <unistd.h>
 
+
+header_t *find_free_block(size_t size){
+  if(free_list == NULL) return NULL;
+  while(free_list->next){
+    if(free_list->size <= size && free_list->is_free){
+      remove_from_free_list(free_list);
+      return free_list;
+    }
+
+    free_list = free_list->next;
+  }
+
+  return NULL;
+}
+
+void add_to_free_list(header_t *h){
+  if(free_list == NULL){
+    free_list = h;
+  } else {
+    free_list->next = h;  //introduces the new free
+    h->prev = free_list;  //links new free with previous
+    free_list = h;        //move free_list ptr
+  }
+}
+
+void remove_from_free_list(header_t *h){
+  h->prev->next = h->next;
+  h->next->prev = h->prev;
+}
+
+
 /*
  * Initializes a header for a memory segment
  * */
 header_t *init_header(size_t size) {
-  // segment total size (header + data)
   size_t total_size = sizeof(header_t) + size;
 
   // CRUCIAL LINE !
   // sbrk() is a syscall which asks the kernel for space
-  header_t *header = sbrk(total_size);
-  if (header == (void *)-1)
-    return NULL;
+  // TODO we can optimize this by searching for available blocks
+  header_t *header = find_free_block(size) ?: sbrk(total_size);
+  // header_t *header = sbrk(total_size);
+  if (header == (void *)-1) return NULL;
 
   // sets header's properties
   header->size = size;
   header->is_free = 0;
   header->next = NULL;
+  header->prev = NULL;
 
   if (head == NULL) {
     head = header;
     tail = header;
-  } else {
-    tail = header;
+  }
+  else {
+    tail->next = header; //introduces the new header
+    header->prev = tail; //links the new header with the previous tail
+    tail = header;       //moves tail pointer to new header
   }
 
   return header;
@@ -70,10 +105,10 @@ void *my_malloc(size_t bytes) {
   return init_segment(bytes); 
 }
 
-
 void my_free(void *ptr) {
   header_t *h = get_header_ptr(ptr);
   h->is_free = 1;
+  add_to_free_list(h);
 }
 
 void *my_calloc(size_t size) {
@@ -90,7 +125,8 @@ void *my_calloc(size_t size) {
 
 void *my_realloc(void *ptr, size_t new_size) {
   // if ptr is NULL, acts like a malloc()
-  if (ptr == NULL) return my_malloc(new_size);
+  if (ptr == NULL)
+    return my_malloc(new_size);
 
   // if new_size is 0, acts like a free()
   if (new_size == 0) {
@@ -100,7 +136,8 @@ void *my_realloc(void *ptr, size_t new_size) {
 
   // initalizes new segment
   void *new_ptr = my_malloc(new_size);
-  if (!new_ptr) return NULL;
+  if (!new_ptr)
+    return NULL;
 
   header_t *old_header = get_header_ptr(ptr);
   size_t copy_size =
@@ -112,10 +149,15 @@ void *my_realloc(void *ptr, size_t new_size) {
   char *dest = new_ptr;
 
   // copies data into the new segment
-  for (size_t i = 0; i < copy_size; i++) dest[i] = source[i];
+  for (size_t i = 0; i < copy_size; i++)
+    dest[i] = source[i];
   my_free(ptr);
 
   return new_ptr;
+}
+
+unsigned long get_segment_size(header_t *h){
+  return sizeof(header_t) + h->size;
 }
 
 void print_segment(void *s) {
@@ -123,28 +165,31 @@ void print_segment(void *s) {
   printf("\n");
   printf("==============================\n");
   printf("HEADER\n");
-  printf("Header size: %zu\n", header->size);
+  printf("header ptr: %p\n", header);
+  printf("Header size: %zu\n", sizeof(header_t));
   printf("Header is_free: %d\n", header->is_free);
   printf("------------------------------\n");
   printf("DATA\n");
   printf("Data ptr: %p\n", s);
+  printf("Data size: %zu\n", header->size);
+  printf("==============================\n");
+  printf("sizeof entire segment: %zu\n", get_segment_size(header));
   printf("==============================\n");
   printf("\n");
 }
 
 int main(void) {
-  void *ptr = my_malloc(8);
+  void *ptr = my_malloc(34);
+  void *ptr2 = my_malloc(34);
+  void *ptr3 = my_malloc(34);
+  void *ptr4 = my_malloc(34);
+  void *ptr5 = my_malloc(34);
+
   print_segment(ptr);
-  my_free(ptr);
+  print_segment(ptr5);
+  printf("\n");
+  printf("head -> %p\n", head);
+  printf("tail -> %p\n", tail);
 
-  void *realloc_ptr = my_realloc(ptr, 20);
-  print_segment(realloc_ptr);
-
-  my_free(realloc_ptr);
-
-  void *calloc_segment = my_calloc(35);
-  print_segment(calloc_segment);
-
-  my_free(calloc_segment);
   return 0;
 }
