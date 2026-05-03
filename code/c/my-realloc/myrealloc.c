@@ -66,7 +66,10 @@ header_t *get_header_ptr(void *ptr) {
   return (header_t *)((char *)ptr - sizeof(header_t));
 }
 
-void *my_malloc(size_t bytes) { return init_segment(bytes); }
+void *my_malloc(size_t bytes) { 
+  return init_segment(bytes); 
+}
+
 
 void my_free(void *ptr) {
   header_t *h = get_header_ptr(ptr);
@@ -75,6 +78,11 @@ void my_free(void *ptr) {
 
 void *my_calloc(size_t size) {
   void *segment = my_malloc(size);
+
+  // this is weird, better would be:
+  //
+  // memset(segment, 0, size);
+  //
   for (size_t i = 0; i < size; i++)
     ((char *)segment)[i] = 0;
   return segment;
@@ -82,8 +90,7 @@ void *my_calloc(size_t size) {
 
 void *my_realloc(void *ptr, size_t new_size) {
   // if ptr is NULL, acts like a malloc()
-  if (ptr == NULL)
-    return my_malloc(new_size);
+  if (ptr == NULL) return my_malloc(new_size);
 
   // if new_size is 0, acts like a free()
   if (new_size == 0) {
@@ -93,8 +100,7 @@ void *my_realloc(void *ptr, size_t new_size) {
 
   // initalizes new segment
   void *new_ptr = my_malloc(new_size);
-  if (!new_ptr)
-    return NULL;
+  if (!new_ptr) return NULL;
 
   header_t *old_header = get_header_ptr(ptr);
   size_t copy_size =
@@ -106,8 +112,7 @@ void *my_realloc(void *ptr, size_t new_size) {
   char *dest = new_ptr;
 
   // copies data into the new segment
-  for (size_t i = 0; i < copy_size; i++)
-    dest[i] = source[i];
+  for (size_t i = 0; i < copy_size; i++) dest[i] = source[i];
   my_free(ptr);
 
   return new_ptr;
