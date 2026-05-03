@@ -32,7 +32,7 @@ void my_free(void *ptr);
 void *my_realloc(void *ptr, size_t new_size);
 void print_segment(void *s);
 
-header_t *find_free_block(size_t size);
+header_t *find_and_remove_free_block(size_t size);
 void add_to_free_list(header_t *h);
 void remove_from_free_list(header_t *t);
 #endif

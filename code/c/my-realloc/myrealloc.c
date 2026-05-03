@@ -3,33 +3,34 @@
 #include <unistd.h>
 
 
-header_t *find_free_block(size_t size){
-  if(free_list == NULL) return NULL;
-  while(free_list->next){
-    if(free_list->size <= size && free_list->is_free){
-      remove_from_free_list(free_list);
-      return free_list;
+header_t *find_and_remove_free_block(size_t size){
+  header_t *current = free_list;
+  header_t *prev = NULL;
+  
+  while(current != NULL){
+    if(current->size >= size){
+      if(prev == NULL){
+        free_list = current->next;
+      } else {
+        prev->next = current->next;
+      }
+      current->next = NULL;
+      return current;
     }
-
-    free_list = free_list->next;
+    prev = current;
+    current = current->next;
   }
-
+  
   return NULL;
 }
 
 void add_to_free_list(header_t *h){
-  if(free_list == NULL){
-    free_list = h;
-  } else {
-    free_list->next = h;  //introduces the new free
-    h->prev = free_list;  //links new free with previous
-    free_list = h;        //move free_list ptr
-  }
+  h->next = free_list;
+  free_list = h;
 }
 
 void remove_from_free_list(header_t *h){
-  h->prev->next = h->next;
-  h->next->prev = h->prev;
+  (void)h;
 }
 
 
@@ -40,13 +41,14 @@ header_t *init_header(size_t size) {
   size_t total_size = sizeof(header_t) + size;
 
   // CRUCIAL LINE !
+  // first, searches in the free_list if there is a block available
+  // for the size requested. If is not found, allocates new memory with sbrk();
+  //
   // sbrk() is a syscall which asks the kernel for space
-  // TODO we can optimize this by searching for available blocks
-  header_t *header = find_free_block(size) ?: sbrk(total_size);
-  // header_t *header = sbrk(total_size);
+  //
+  header_t *header = find_and_remove_free_block(size) ?: sbrk(total_size);
   if (header == (void *)-1) return NULL;
 
-  // sets header's properties
   header->size = size;
   header->is_free = 0;
   header->next = NULL;
@@ -185,11 +187,23 @@ int main(void) {
   void *ptr4 = my_malloc(34);
   void *ptr5 = my_malloc(34);
 
+  printf("=== INITIAL ALLOCATIONS ===\n");
   print_segment(ptr);
   print_segment(ptr5);
-  printf("\n");
-  printf("head -> %p\n", head);
+  printf("\nhead -> %p\n", head);
   printf("tail -> %p\n", tail);
+  printf("free_list -> %p\n\n", free_list);
+
+  printf("=== FREE ptr, ptr2, ptr3 ===\n");
+  my_free(ptr);
+  my_free(ptr2);
+  my_free(ptr3);
+  printf("free_list -> %p\n\n", free_list);
+
+  printf("=== REALLOC ===\n");
+  void *ptr_new = my_malloc(34);
+  print_segment(ptr_new);
+  printf("free_list -> %p\n", free_list);
 
   return 0;
 }
