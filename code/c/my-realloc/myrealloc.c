@@ -29,10 +29,6 @@ void add_to_free_list(header_t *h){
   free_list = h;
 }
 
-void remove_from_free_list(header_t *h){
-  (void)h;
-}
-
 
 /*
  * Initializes a header for a memory segment
@@ -201,7 +197,7 @@ int main(void) {
   printf("free_list -> %p\n\n", free_list);
 
   printf("=== REALLOC ===\n");
-  void *ptr_new = my_malloc(34);
+  void *ptr_new = my_realloc(ptr5, 49);
   print_segment(ptr_new);
   printf("free_list -> %p\n", free_list);
 
