@@ -1,4 +1,3 @@
-#include "n-queens.h"
 #include <stdio.h>
 
 /*
@@ -18,19 +17,23 @@ typedef int Board[N][N];
 int queen_is_safe(Board *b, int x, int y) {
   for (int i = 0; i < N; i++) {
     // horizontal
-    if (b[x][y + i])
-      return 1;
+    if (b[x][i])
+      return 0;
 
     // vertical
-    if (b[x + i][y])
-      return 1;
+    if (b[i][y])
+      return 0;
 
     // diagonal
-    if (b[x + i][y + i])
-      return 1;
+    int d1 = x + y - 1;
+    if(d1 >= 0 && d1 < N && b[i][d1]) return 0;
+
+    //diagonal
+    int d2 = i + y - x;
+    if(d1 >= 0 && d2 < N && b[i][d2]) return 0;
   }
 
-  return 0;
+  return 1;
 }
 
 void print_board(Board b) {
