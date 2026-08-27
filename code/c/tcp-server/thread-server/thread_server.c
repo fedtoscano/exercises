@@ -15,6 +15,10 @@
 #define BACKLOG 16   // how many clients can be queued
 #define BUFSIZE 4096 // buffer size for incoming data
 
+
+long TOTAL_CONNECTIONS = 0;
+pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+
 int make_listener(int port) {
   // creating a file descriptor
   int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -113,8 +117,15 @@ void handle_client(int cfd) {
   }
 }
 
+void increment_total_connection(void){
+  pthread_mutex_lock(&mtx);
+  for(int i = 0; i < 1000; i++) TOTAL_CONNECTIONS++;
+  pthread_mutex_unlock(&mtx);
+}
+
 void *routine_start(void *arg) { 
   pthread_detach(pthread_self());
+  increment_total_connection();
   int cfd = (intptr_t)arg;
   handle_client(cfd);
   close(cfd);
