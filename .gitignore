@@ -1,0 +1,21 @@
+# Build output. Il sorgente è l'artefatto: il binario si rifà con un make.
+
+a.out
+*.o
+*.so
+*.gch
+
+# File di dipendenze generati da -MMD -MP
+*.d
+
+# Binari senza estensione: vanno elencati a mano, perché git non ha modo di
+# distinguerli da un file qualsiasi. Un pattern per ogni eseguibile prodotto.
+code/c/n-queens/n-queens
+code/c/tcp-server/*/server
+code/c/lang/*/mango
+
+# Core dump e log dei sanitizer
+core
+core.*
+*.asan
+*.ubsan
