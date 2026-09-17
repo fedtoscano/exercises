@@ -4,8 +4,8 @@ Registro di studio. Lo leggo all'inizio di ogni sessione e lo aggiorno alla
 fine, prima del commit. È scritto per te, non per me.
 
 **Traccia attiva:** **mango** — un linguaggio: interprete → VM bytecode → GC — Tappa 0: cos'è un linguaggio
-**Ultima sessione:** 2026-09-17 — Tappa 0, sessione 1
-**Sessioni fatte su questa tappa:** 1
+**Ultima sessione:** 2026-09-17 — Tappa 0, sessione 2
+**Sessioni fatte su questa tappa:** 2
 
 ---
 
@@ -35,10 +35,36 @@ fine, prima del commit. È scritto per te, non per me.
   `union`, `tagged union`, e allineamento/padding misurati a mano con `sizeof`
   e `offsetof`: struct grassa 40 byte, tag + union 24, union all'offset 8.
 
-**Prossimo passo**
-Chiudere la Tappa 0 con la **grammatica**: dove vive, esattamente, la regola
-per cui `*` lega più forte di `+`. Non nel lexer, non nell'interprete — e
-capire dove significa capire come il parser la applicherà.
+- **Tappa 0, sessione 2 (17 set 2026):** la grammatica. BNF come
+  *meta*-linguaggio, con i due strati di simboli da non confondere (`|` è
+  punteggiatura della notazione, `'+'` è un carattere di mango). Derivare è
+  puramente sintattico — sbagliando hai valutato entrambi gli alberi di
+  `1 + 2 * 3` e ottenuto **9 e 7**, che è la dimostrazione migliore possibile
+  del perché una grammatica ambigua non è un difetto estetico: non definisce
+  il significato del programma. Poi la stratificazione `expr / term / factor`,
+  derivata da te dopo parecchie sbandate: **la precedenza è la profondità
+  nelle regole**, l'associatività è la posizione del non terminale ricorsivo,
+  e `factor -> '(' expr ')'` chiude il ciclo dal livello più basso al più
+  alto, che è il motivo per cui le parentesi "scambiano chi sta sopra".
+
+Il nucleo aritmetico è derivato e verificato, ed è nel README alla sezione 5.8:
+
+```
+expr   -> term   | expr '+' term   | expr '-' term
+term   -> factor | term '*' factor | term '/' factor
+factor -> NUM    | '(' expr ')'
+```
+
+Resta `grammatica.md`, che è quasi trascrizione. Due cose richiedono ancora
+testa, ed è dove riparti domani:
+
+1. `expr '+' term | expr '-' term` oppure un `addop -> '+' | '-'` usato una
+   volta sola? Domanda posta e non risposta. La risposta si vede pensando alla
+   Tappa 2, quando ogni non terminale diventa una funzione C.
+2. **Il meno unario.** Decisione di design tua: `-2 * 3` dà `(-2) * 3` o
+   `-(2 * 3)`? Serve la regola *e* la motivazione.
+
+Poi si apre la Tappa 1, il lexer.
 
 **Domande aperte**
 - `sine.c:70–74` — `sine_sample` ritorna `uint16_t`, ma un campione a 16 bit è
@@ -60,6 +86,10 @@ probabile.
 
 | Quando | ×  | Errore | Dove è successo |
 |---|---|---|---|
+| 2026-09-17 | 3 | Dimensione e allineamento confusi: `_Alignof` dedotto dalla `sizeof` del membro più grande (union 16 → "allineata a 16") | previsione di `sizeof(Node)` col tag in coda |
+| 2026-09-17 | 2 | Derivazione mescolata a valutazione: calcolato `1+2` in mezzo a una derivazione sintattica | derivazioni di `1 + 2 * 3` |
+| 2026-09-17 | 1 | Padding in coda dimenticato su un aggregato (`CALL_STRUCT` "12 byte") a dieci secondi dall'aver enunciato la regola giusta | sessione 2 Tappa 0 |
+| 2026-09-17 | 1 | `void *` → `double *`: creduto un errore di compilazione. In C è una conversione implicita legale, zero warning anche con `-Wconversion` | `pre_work.c`, lettura del membro sbagliato della union |
 | 2026-09-17 | 1 | `%d` e poi `%lu` per un `size_t`: warning zittito invece che corretto (`%zu`) | esperimento `sizeof` della Tappa 0 |
 | 2026-09-17 | 1 | `offsetof(T, T->campo)`: confuso un designatore di campo con un'espressione runtime | esperimento `sizeof` della Tappa 0 |
 | 2026-09-04 | 1 | `double` negativo convertito a tipo unsigned: UB, non wrap | `~/Work/audio/sine.c:70,74` |
@@ -96,6 +126,15 @@ te l'ho spiegato.
 | 2026-09-17 | `union`: tutti i membri a offset 0, `sizeof` = il più grande | misurato: union di `double`+puntatore = 8, non 16 |
 | 2026-09-17 | Tagged union: il tag è necessario perché "campo valido" non è nei byte | ragionato sul nodo AST ad arietà variabile |
 | 2026-09-17 | Allineamento e padding, interno e in coda | `offsetof` = 8, `sizeof` = 24 contro i 20 previsti |
+| 2026-09-17 | BNF: meta-simboli contro simboli del linguaggio descritto, terminali e non terminali | grammatica di mango scritta da te in sei righe |
+| 2026-09-17 | Derivazione: ogni passo è un nodo, la derivazione *è* l'albero, ed è pura sintassi | derivazioni di `1 + 2 * 3` riga per riga |
+| 2026-09-17 | Grammatica ambigua: stessa stringa, due alberi, due valori (9 e 7) | le due derivazioni dalla grammatica ingenua |
+| 2026-09-17 | La precedenza è la profondità nelle regole: un livello = un non terminale | `expr` / `term` / `factor` |
+| 2026-09-17 | L'associatività è la posizione del non terminale ricorsivo | `expr '+' term` contro `term '+' expr` |
+| 2026-09-17 | Le parentesi sono un ciclo dal livello più basso al più alto | `factor -> '(' expr ')'` |
+| 2026-09-17 | Aggiungere un operatore di pari forza = un'alternativa in più, non un livello in più | `-` messo con `+`, `/` con `*`, dedotto da `1 - 2 * 3 = -5` |
+| 2026-09-17 | L'associatività a sinistra è gratis con la ricorsione a sinistra | derivato `8 / 4 / 2`, confrontati i due alberi: 1 contro 4 |
+| 2026-09-17 | Derivazione dall'alto (primo nodo = radice) contro valutazione dal basso (radice = ultima operazione) | il primo `/` derivato è quello più a destra nel testo |
 
 ---
 
@@ -103,6 +142,7 @@ te l'ho spiegato.
 
 ### Traccia attiva — **mango**, in `code/c/lang/`
 - [ ] Tappa 0 — Cos'è un linguaggio: token, grammatica, albero. Nessun codice
+      *(teoria chiusa; manca solo `grammatica.md`, scritta da te)*
 - [ ] Tappa 1 — Lexer a mano: tagged union, buffer, EOF e stati d'errore
 - [ ] Tappa 2 — Parser a discesa ricorsiva: precedenza, e **chi possiede i nodi dell'AST** (arriva l'arena)
 - [ ] Tappa 3 — Interprete ad albero: valori come tagged union, environment, scope
@@ -134,3 +174,4 @@ Una riga per sessione. Serve a vedere il ritmo vero, non quello dichiarato.
 |---|---|---|
 | 2026-09-17 | — | Sessione di metodo: definito come si lavora, scelto il progetto linguaggio, ricostruito questo registro da zero |
 | 2026-09-17 | 0 | Catena di rappresentazioni, AST, associatività. Il tipo del nodo porta a `union` e tagged union: misurati 40 → 24 byte con `sizeof`/`offsetof` |
+| 2026-09-17 | 0 | Grammatica. BNF, ambiguità dimostrata coi due valori 9 e 7, stratificazione `expr/term/factor` derivata a fatica, poi `-` e `/` e la verifica di associatività su `8/4/2`. Sessione lunga e in salita: la BNF era stata introdotta male, in una riga, ed è stata rifatta a metà strada. Fermato prima di `grammatica.md` |
