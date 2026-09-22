@@ -15,7 +15,7 @@ Non una cosa sola: una sequenza di forme diverse dello stesso programma, dove
 ogni passaggio butta via qualcosa di irrilevante e rende possibile il
 passaggio dopo.
 
-```
+```txt
   "1 + 2 * 3"                     testo: un array di char, niente di più
        |
        |  LEXER  — raggruppa i caratteri in parole, butta gli spazi
@@ -50,7 +50,7 @@ quell'informazione.
 
 ## 2. Le parentesi non esistono nell'albero
 
-```
+```txt
    1 + 2 * 3              (1 + 2) * 3
        (+)                    (*)
       /   \                  /   \
@@ -76,7 +76,7 @@ diversi, e uno va scelto.
 Per `+` e `*` il risultato non cambia — sono associativi sugli interi. Per `-`
 e `/` cambia eccome:
 
-```
+```txt
 8 / 4 / 2   ->  (8/4)/2 = 1      1 - 2 - 3  ->  (1-2)-3 = -4
             ->  8/(4/2) = 4                 ->  1-(2-3) =  2
 ```
@@ -88,7 +88,7 @@ fare quello che si aspetta chi lo scrive.
 
 Associano a destra, e sono pochi e riconoscibili:
 
-```
+```txt
 a = b = c     ->  a = (b = c)
 2 ^ 3 ^ 2     ->  2 ^ (3 ^ 2) = 512,  non (2^3)^2 = 64
 ```
@@ -498,17 +498,19 @@ factor -> NUM
         | '(' expr ')'
 ```
 
-Questo è il nucleo aritmetico di mango, ed è il contratto delle Tappe 1 e 2.
+Questo è il nucleo aritmetico **senza il meno unario**, che è stato aggiunto
+nella sessione 3 con un livello `unary` fra `term` e `factor`. La versione
+definitiva, annotata, sta in `grammar.md`: quella è il contratto delle Tappe
+1 e 2, questa è la tappa intermedia del ragionamento.
 
 ---
 
 ## Rimasto aperto
 
-- **`grammatica.md` è da scrivere.** La sezione 5 copre solo il nucleo
-  aritmetico `+ * ()`. Manca la grammatica completa di mango: `-` e `/` (a
-  quale livello vanno, e perché non serve inventarne di nuovi), e soprattutto
-  il **meno unario**, che è una decisione di design: `-2 * 3` deve dare l'albero
-  `(-2) * 3` o `-(2 * 3)`? Va deciso e motivato.
+- ~~`grammar.md` è da finire.~~ **Chiuso il 21 set 2026.** Contiene i quattro
+  livelli annotati, le tre decisioni motivate e due derivazioni con albero di
+  derivazione e AST. Scritto da me su richiesta esplicita, non da Federico —
+  registrato in `LEARNING.md`.
 - **Dimensione e allineamento sono due proprietà indipendenti.** Confuse tre
   volte nella stessa sessione. `_Alignof(aggregato)` = il massimo degli
   `_Alignof` dei membri, ricorsivamente fino agli **scalari** — non si deduce
@@ -529,10 +531,10 @@ Questo è il nucleo aritmetico di mango, ed è il contratto delle Tappe 1 e 2.
   sulla prima tagged union, più la lettura del membro sbagliato di una union
   che finisce in segfault. Non è codice di mango, è uno strumento di misura,
   tenuto come traccia di come ci si è arrivati.
-- `grammatica.md` — **da scrivere**: la grammatica BNF completa di mango, con
-  un livello per precedenza, l'associatività annotata riga per riga, la scelta
-  motivata sul meno unario, e due esempi derivati a mano col rispettivo albero
-  (uno dei quali con parentesi). È il contratto delle Tappe 1 e 2.
+- `grammar.md` — la grammatica BNF completa di mango: un livello per
+  precedenza, l'associatività annotata riga per riga con la stringa che la
+  dimostra, le tre decisioni motivate, e due derivazioni a mano con albero di
+  derivazione e AST affiancati. È il contratto delle Tappe 1 e 2.
 
 ## Confronto col sorgente vero
 
